@@ -153,7 +153,7 @@ def get_user_ids(user_collection):
     
     total_users = list(user_collection.find({},{'_id': 1}))
     total_users = [u['_id'] for u in total_users]
-    print("Number of total users:",len(total_users))
+    #print("Number of total users:",len(total_users))
     return total_users
 
 def get_friendships_by_userid(user_id, total_users, user_collection):
@@ -197,7 +197,7 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
         filter_content = {
             '$push': {
                 'friends' : {
-                    '$each' : political_friendship_ids['friends']
+                    '$each' : political_friendship_ids['friends'] 
                 },
                 'followers' : {
                     '$each' : political_friendship_ids['followers']
@@ -220,7 +220,7 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
 
     #print(filter_uid,filter_content)
     res = user_collection.update_one(filter_uid, filter_content, upsert=True)
-    print(message + "\tMa:", res.matched_count, "\tMo:", res.modified_count, "\tUp:", res.upserted_id, ";\tDONE!")
+    #print(message + "\tMa:", res.matched_count, "\tMo:", res.modified_count, "\tUp:", res.upserted_id, ";\tDONE!")
     return True
 
 # update the database with botscore
