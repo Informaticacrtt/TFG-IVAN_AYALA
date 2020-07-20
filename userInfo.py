@@ -4,7 +4,6 @@
 import sys
 import re
 
-
 # Botometer API
 import botometer
 
@@ -47,7 +46,7 @@ def get_user(user):
         api = tweepy.API(auth, wait_on_rate_limit=True)
     
         # Obtain by username
-        return api.get_user(screen_name = user)
+        return api.get_user(user)
 
 
     except Exception as e:
@@ -223,7 +222,6 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
     res = user_collection.update_one(filter_uid, filter_content, upsert=True)
     print(message + "\tMa:", res.matched_count, "\tMo:", res.modified_count, "\tUp:", res.upserted_id, ";\tDONE!")
     return True
-
 
 # update the database with botscore
 user = get_user(sys.argv[1])

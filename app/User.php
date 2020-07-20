@@ -52,6 +52,7 @@ class User extends Eloquent implements Authenticatable
         // First of all, we've to check if the requested user 
         // is in our database.
         $users=User::all();
+        $route = base_path().'/userInfo.py';
 
         // Depend on the input, the search is different.
         if ($request-> has('username')){
@@ -64,7 +65,7 @@ class User extends Eloquent implements Authenticatable
             // In this case, the user doesn't appear at database.
             // So, we've to use our own script in order to get all 
             // information about the requested user. 
-            $process = new Process("python3 /Users/crazytotix/TFG-IVAN_AYALA/userInfo.py {$request->username}" );
+            $process = new Process("python3  $route {$request->username} ");
             $process->run();
 
             // executes after the command finishes
@@ -84,7 +85,17 @@ class User extends Eloquent implements Authenticatable
             }
             // In this case, the user doesn't appear at database.
             // So, we've to use our own script in order to get all 
-            // information about the requested user.         
+            // information about the requested user.   
+            $process = new Process("python3 $route {$request->userID} " );
+            $process->run();
+
+            // executes after the command finishes
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+
+            echo $process->getOutput();       
         }
     }
 
