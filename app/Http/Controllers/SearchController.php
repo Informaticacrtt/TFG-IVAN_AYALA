@@ -14,7 +14,7 @@ class SearchController extends Controller
         if (!$request-> has('username') && !$request-> has('userID'))
             return back()->withInput();
         else {
-            $result = User::checkForm($request);        
+            $result = User::getInfo($request);        
             return view('search', array('result'=> $result));
         }
 

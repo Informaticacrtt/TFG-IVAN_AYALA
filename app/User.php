@@ -6,6 +6,9 @@ use Illuminate\Notifications\Notifiable;
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 use Illuminate\Auth\Authenticatable as AuthenticableTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
+use App\Botometer;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 class User extends Eloquent implements Authenticatable
 {
@@ -43,16 +46,35 @@ class User extends Eloquent implements Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public static function checkForm($request){
-        $users=User::all(); 
+    
+    
+    public static function getInfo($request){
+        // First of all, we've to check if the requested user 
+        // is in our database.
+        $users=User::all();
+
+        // Depend on the input, the search is different.
         if ($request-> has('username')){
             // Search by username
             foreach ($users as $user) {
-                if ($user->scores['user']['screen_name'] == $request->username)
+                if (strtoupper($user->scores['user']['screen_name']) == strtoupper($request->username))
                     return $user;
             }
-            // We've to use botometer & botbusters
-            
+
+            // In this case, the user doesn't appear at database.
+            // So, we've to use our own script in order to get all 
+            // information about the requested user. 
+            $process = new Process("python3 /Users/crazytotix/TFG-IVAN_AYALA/userInfo.py {$request->username}" );
+            $process->run();
+
+            // executes after the command finishes
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+
+            echo $process->getOutput(); 
+                
         }
         else if ($request-> has('userID')){
             // Search by id
@@ -60,8 +82,14 @@ class User extends Eloquent implements Authenticatable
                 if ($user->scores['user']['id_str']  == $request->userID)
                     return $user;
             }
-            // We've to use botometer & botbusters
+            // In this case, the user doesn't appear at database.
+            // So, we've to use our own script in order to get all 
+            // information about the requested user.         
         }
     }
+
+ 
+    
+
 
 }
