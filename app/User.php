@@ -73,8 +73,15 @@ class User extends Eloquent implements Authenticatable
                 throw new ProcessFailedException($process);
             }
 
+            #echo $process->getOutput(); 
+            $users=User::all();
 
-            echo $process->getOutput(); 
+            // Search by username
+            foreach ($users as $user) {
+                if (strtoupper($user->scores['user']['screen_name']) == strtoupper($request->username))
+                    return $user;
+            }
+
                 
         }
         else if ($request-> has('userID')){
