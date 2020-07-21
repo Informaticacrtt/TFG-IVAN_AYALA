@@ -3,6 +3,7 @@
 # Utilities
 import sys
 import re
+import json
 
 # Botometer API
 import botometer
@@ -17,11 +18,11 @@ from bson import ObjectId
 import tweepy
 
 # Keys
-RAPID_API_KEY = '996b6059b5msh054ffbac53e17a0p15482ajsna37d1925b5a2'
-TWITTER_DEV_CONSUMER_KEY = 'JAtCAECeGWpyeoTscmBpWQBsZ'
-TWITTER_DEV_CONSUMER_SECRET = 'm3K33k9Zq6jNUHSi3hgjn7pJ9RFXgCUgf4bgegaZMXmjRPAOL2'
-TWITTER_DEV_ACCESS_TOKEN = '1204405321256570886-1mEoTSN6pGGArbpCCOcIYHnF2dNeCD'
-TWITTER_DEV_ACCESS_TOKEN_SECRET = 'YySOQsgqCT8jEF7jWH65rv1AgGbpmi1DBypZJ4SS5yFdv'
+RAPID_API_KEY = ''
+TWITTER_DEV_CONSUMER_KEY = ''
+TWITTER_DEV_CONSUMER_SECRET = '
+TWITTER_DEV_ACCESS_TOKEN = ''
+TWITTER_DEV_ACCESS_TOKEN_SECRET = ''
 
 # Botometer and Twitter Keys
 rapidapi_key = RAPID_API_KEY # now it's called rapidapi key
@@ -35,6 +36,10 @@ twitter_app_auth = {
 # MongoDB parameters
 mongoclient = MongoClient('127.0.0.1', 27017)
 db = mongoclient.SFM
+
+MINIMUM_BOTSCORE = 0.43
+MAX_DEPTH = 1
+DEPTH = 0
 
 def get_user(user):
 
@@ -180,30 +185,34 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
         auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(TWITTER_DEV_ACCESS_TOKEN, TWITTER_DEV_ACCESS_TOKEN_SECRET)
         api = tweepy.API(auth)
+
         political_friendship_ids = {
             'friends' : [],
-            'followers': [],
+            'followers': []
         }
+        
+        for name,method in zip(['friends','followers'],[api.friends_ids,api.followers_ids]):
+            #print("\tQuerying", name, method)
+            for friendships in tweepy.Cursor(method, user_id = user_id).items(200):
+                botscore = botometer_instance.check_account(friendships)
+                botscore['_id'] = make_objid(friendships)
+                political_friendship_ids[name].append(botscore)
+                
 
-        for user in tweepy.Cursor(api.friends, id=user_id).items():
-            political_friendship_ids['friends'].append(make_objid (user.id))
-
-        for user in tweepy.Cursor(api.followers, id=user_id).items():
-            political_friendship_ids['followers'].append(make_objid (user.id))
-
-      
         message += "\tFriends:" + str(len(political_friendship_ids['friends']))
         message += "\tFollowers:" + str(len(political_friendship_ids['followers']))
         filter_content = {
             '$push': {
                 'friends' : {
-                    '$each' : political_friendship_ids['friends'] 
+                    '$each' : political_friendship_ids['friends']
                 },
                 'followers' : {
                     '$each' : political_friendship_ids['followers']
                 }
             }
         }
+        print (filter_content)
+
 
     except tweepy.TweepError as err:
         print(message+"tweepy.TweepError=", err)
@@ -223,11 +232,15 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
     #print(message + "\tMa:", res.matched_count, "\tMo:", res.modified_count, "\tUp:", res.upserted_id, ";\tDONE!")
     return True
 
+        
 # update the database with botscore
 user = get_user(sys.argv[1])
 botscore_to_mongodb(user.id, db.users)
 total_users = get_user_ids(db.users)
 # upodate the database with friendships
 get_friendships_by_userid(user.id, total_users, db.users)
+
+
+
 
 

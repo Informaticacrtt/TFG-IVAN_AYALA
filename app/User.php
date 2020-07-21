@@ -66,6 +66,7 @@ class User extends Eloquent implements Authenticatable
             // So, we've to use our own script in order to get all 
             // information about the requested user. 
             $process = new Process("python3  $route {$request->username} ");
+            $process->setTimeout(3600);
             $process->run();
 
             // executes after the command finishes
@@ -101,8 +102,15 @@ class User extends Eloquent implements Authenticatable
                 throw new ProcessFailedException($process);
             }
 
+            #echo $process->getOutput();       
+            $users=User::all();
 
-            echo $process->getOutput();       
+            // Search by id
+            foreach ($users as $user) {
+                if ($user->scores['user']['id_str']  == $request->userID)
+                    return $user;
+            }
+
         }
     }
 
