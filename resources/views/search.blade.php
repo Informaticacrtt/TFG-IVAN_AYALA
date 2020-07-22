@@ -25,13 +25,13 @@
             $followers = count($result ->followers);
             $followers_bots = count($result ->followers_bots);
             $total = $followers + $followers_bots; 
-            echo $followers.' ('.$followers_bots/$total.'%)';?>
+            echo $followers.' ('.bcdiv($followers_bots, $total, 2).'%)';?>
         </td>
         <td><?php
             $friends = count($result ->friends);
             $friends_bots = count($result ->friends_bots);
             $total = $friends + $friends_bots; 
-            echo $friends.' ('.$friends_bots/$total.'%)';?>
+            echo $friends.' ('.bcdiv($friends_bots,$total,2).'%)';?>
         </td>
     </tr>
 </table>
