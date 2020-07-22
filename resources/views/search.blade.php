@@ -18,11 +18,21 @@
     </tr>
 
     <tr>
-         <td><?php echo $result ->scores['user']['screen_name'];?></td>
-         <td><?php echo $result -> scores['user']['id_str'];?></td>
-         <td><?php echo round($result -> scores['cap']['english'],2).'/'.round($result -> scores['cap']['universal'],2) ;?></td>
-         <td><?php echo count($result ->followers);?></td>
-         <td><?php echo count($result ->friends);?></td>
+        <td><?php echo $result ->scores['user']['screen_name'];?></td>
+        <td><?php echo $result -> scores['user']['id_str'];?></td>
+        <td><?php echo (round($result -> scores['cap']['universal'],2)*100).'%' ;?></td>
+        <td><?php
+            $followers = count($result ->followers);
+            $followers_bots = count($result ->followers_bots);
+            $total = $followers + $followers_bots; 
+            echo $followers.' ('.$followers_bots/$total.'%)';?>
+        </td>
+        <td><?php
+            $friends = count($result ->friends);
+            $friends_bots = count($result ->friends_bots);
+            $total = $friends + $friends_bots; 
+            echo $friends.' ('.$friends_bots/$total.'%)';?>
+        </td>
     </tr>
 </table>
    

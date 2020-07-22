@@ -187,17 +187,29 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
             'friends' : [],
             'followers': []
         }
+
+        political_bots_friendship_ids = {
+            'friends_bots' : [],
+            'followers_bots': []
+        }
         
         for name,method in zip(['friends','followers'],[api.friends_ids,api.followers_ids]):
             #print("\tQuerying", name, method)
             for friendships in tweepy.Cursor(method, user_id = user_id).items(200):
                 botscore = botometer_instance.check_account(friendships)
-                botscore['_id'] = make_objid(friendships)
-                political_friendship_ids[name].append(botscore)
+                # We are only interested in bot's friends
+                if (botscore['cap']['universal'] >= MINIMUM_BOTSCORE):
+                    botscore['_id'] = make_objid(friendships)
+                    political_bots_friendship_ids[name + '_bots'].append(botscore)
+                else:
+                    political_friendship_ids[name].append(botscore)
+
                 
 
         message += "\tFriends:" + str(len(political_friendship_ids['friends']))
         message += "\tFollowers:" + str(len(political_friendship_ids['followers']))
+        message += "\tFriends_bots:" + str(len(political_bots_friendship_ids['friends_bots']))
+        message += "\tFollowers_bots:" + str(len(political_bots_friendship_ids['followers_bots']))
         filter_content = {
             '$push': {
                 'friends' : {
@@ -205,10 +217,15 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
                 },
                 'followers' : {
                     '$each' : political_friendship_ids['followers']
+                },
+                'friends_bots' : {
+                    '$each' : political_bots_friendship_ids['friends_bots']
+                },
+                'followers_bots' : {
+                    '$each' : political_bots_friendship_ids['followers_bots']
                 }
             }
         }
-        print (filter_content)
 
 
     except tweepy.TweepError as err:
@@ -229,7 +246,7 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
     #print(message + "\tMa:", res.matched_count, "\tMo:", res.modified_count, "\tUp:", res.upserted_id, ";\tDONE!")
     return True
 
-        
+     
 # update the database with botscore
 user = get_user(sys.argv[1])
 botscore_to_mongodb(user.id, db.users)
