@@ -3,6 +3,7 @@
 # Utilities
 import sys
 import re
+import random
 import json
 
 # Botometer API
@@ -18,19 +19,18 @@ from bson import ObjectId
 import tweepy
 
 # Keys
-RAPID_API_KEY = ''
+RAPID_API_KEY1 = ''
+RAPID_API_KEY2 = ''
 TWITTER_DEV_CONSUMER_KEY = ''
-TWITTER_DEV_CONSUMER_SECRET = '
+TWITTER_DEV_CONSUMER_SECRET = ''
 TWITTER_DEV_ACCESS_TOKEN = ''
 TWITTER_DEV_ACCESS_TOKEN_SECRET = ''
 
-# Botometer and Twitter Keys
-rapidapi_key = RAPID_API_KEY # now it's called rapidapi key
-twitter_app_auth = {
-    'consumer_key': TWITTER_DEV_CONSUMER_KEY,
-    'consumer_secret': TWITTER_DEV_CONSUMER_SECRET,
-    'access_token': TWITTER_DEV_ACCESS_TOKEN,
-    'access_token_secret': TWITTER_DEV_ACCESS_TOKEN_SECRET,
+
+# Botometer and Twitter Keys for parallel processing
+keys = {
+     0: botometer.Botometer(wait_on_ratelimit=True, rapidapi_key=RAPID_API_KEY1, **{'consumer_key': TWITTER_DEV_CONSUMER_KEY, 'consumer_secret': TWITTER_DEV_CONSUMER_SECRET}),
+     1: botometer.Botometer(wait_on_ratelimit=True, rapidapi_key=RAPID_API_KEY2, **{'consumer_key': TWITTER_DEV_CONSUMER_KEY, 'consumer_secret': TWITTER_DEV_CONSUMER_SECRET}),
 }
 
 # MongoDB parameters
@@ -52,7 +52,6 @@ def get_user(user):
     
         # Obtain by username
         return api.get_user(user)
-
 
     except Exception as e:
         print(message+"Exception. User:", user, "API:", TWITTER_DEV_CONSUMER_KEY, "Message:", e)
@@ -82,9 +81,7 @@ def get_botscore_by_userid(user_id):
     """
     
     try:
-        botometer_instance = botometer.Botometer(wait_on_ratelimit=True,
-                                                rapidapi_key=rapidapi_key,
-                                                **twitter_app_auth)
+        botometer_instance = random.choice(keys)
         consumer_key = botometer_instance.consumer_key
         result = botometer_instance.check_account(user_id)
         return UpdateOne({'_id': make_objid(user_id)}, 
@@ -129,6 +126,7 @@ def get_botscore_by_userid(user_id):
         else:
             print("Exception. User:", user_id, "API:", consumer_key, "Message:", e)
         return None
+    botometer_instance = random.choice(keys)
     
 def botscore_to_mongodb(user, user_collection):
     """
@@ -171,11 +169,10 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
     total_users -- List of the total of Twitter users' identificators within our database
     user_collection -- MongoDB Users' Collection
     """
-    botometer_instance = botometer.Botometer(wait_on_ratelimit=True,
-                                            rapidapi_key=rapidapi_key,
-                                            **twitter_app_auth)
+    botometer_instance = random.choice(keys)
     consumer_key = botometer_instance.consumer_key
     consumer_secret = botometer_instance.consumer_secret
+
     filter_uid = {'_id': make_objid(user_id)}
     message = "Checking:" + str(user_id) + " "
     filter_content = {}
