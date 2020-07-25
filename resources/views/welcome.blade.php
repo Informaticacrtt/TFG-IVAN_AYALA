@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <title>TFG</title>
+    <link href="{{asset('css/app.css')}}" rel="stylesheet"> <!--Añadimos el css generado con webpack-->
 </head>
 <body>
     <nav>
@@ -17,5 +17,12 @@
         <input name="id" placeholder="Identifier... "><br>
         <button>Search</button>
     </form>
+    <div id="app" class="content"><!--La equita id debe ser app, como hemos visto en app.js-->
+        <example-component></example-component><!--Añadimos nuestro componente vuejs-->
+        <grafica-component></grafica-component>
+
+    </div>
+
+    <script src="{{asset('js/app.js')}}"></script> <!--Añadimos el js generado con webpack, donde se encuentra nuestro componente vuejs-->
 </body>
 </html>
