@@ -1,6 +1,7 @@
+
 <template>
   <div class="small">
-    <h4>Reportes del Venta Junio</h4>
+    <h4>{{title}}</h4>
     <line-chart :chart-data="datacollection" :height="100"></line-chart>
   </div>
 </template>

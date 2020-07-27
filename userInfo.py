@@ -25,12 +25,12 @@ from datetime import datetime, date, time, timedelta
 from collections import Counter
 
 # Keys
-RAPID_API_KEY1 = ''
-RAPID_API_KEY2 = ''
-TWITTER_DEV_CONSUMER_KEY = ''
-TWITTER_DEV_CONSUMER_SECRET = ''
-TWITTER_DEV_ACCESS_TOKEN = ''
-TWITTER_DEV_ACCESS_TOKEN_SECRET = ''
+RAPID_API_KEY1 = '1f55d0ab51msh268beee8ad68316p1d2487jsnad4f4c078ce1'
+RAPID_API_KEY2 = '993c6874ebmshbca407607da9d84p187434jsn092252ca8935'
+TWITTER_DEV_CONSUMER_KEY = 'VdGSvaMeaEiP05SCcV9KjnbAc'
+TWITTER_DEV_CONSUMER_SECRET = 'liE7kQEF8RMIuCJ3qIi0JSU0mMHpg6f0Df2aGzJDqd7LyXrj5q'
+TWITTER_DEV_ACCESS_TOKEN = '1204405321256570886-YX0aH39im3yif9DuoAF1boKxmD9GBH'
+TWITTER_DEV_ACCESS_TOKEN_SECRET = 'r42UcOqPAjjVmoGvDcWo5DJefZfBWFKXZ8v8Gj1WwUIT2'
 
 
 # Botometer and Twitter Keys for parallel processing
@@ -218,6 +218,31 @@ def get_tweets_by_userid(user_id):
     except Exception as e:
         print(message+"Exception. User:", user_id, "API:", TWITTER_DEV_CONSUMER_KEY, "Message:", e)
 
+def get_most_common_user_location(user_id):
+
+    try:
+       # Tweepy request
+        auth = tweepy.OAuthHandler(TWITTER_DEV_CONSUMER_KEY, TWITTER_DEV_CONSUMER_SECRET)
+        auth.set_access_token(TWITTER_DEV_ACCESS_TOKEN, TWITTER_DEV_ACCESS_TOKEN_SECRET)
+        api = tweepy.API(auth)
+        message = "Checking:" + str(user_id) + " "
+        # Collect tweets
+        tweets = api.user_timeline(id=user_id) 
+
+        locations = []
+
+
+        for tweet in tweets:
+            locations.append(tweet.user.location)
+        
+        return Counter(locations).most_common(1)[0][0]
+
+    except tweepy.TweepError as err:
+        print(message+"tweepy.TweepError=", err)
+
+    except Exception as e:
+        print(message+"Exception. User:", user_id, "API:", TWITTER_DEV_CONSUMER_KEY, "Message:", e)
+
 def get_friendships_by_userid(user_id, total_users, user_collection):
     """
     Consults followers and followings of a user and save in MongoDB
@@ -249,7 +274,8 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
             'followers_bots': [],
             'Average_tweets_per_day':[],
             'Most_used_hashtags':[],
-            'Most_mentioned_Twitter_users':[]
+            'Most_mentioned_Twitter_users':[],
+            'Most_common_user_location': []
         }
         
         for name,method in zip(['friends','followers'],[api.friends_ids,api.followers_ids]):
@@ -263,15 +289,18 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
                     botscore['Most_used_hashtags'] = [tweet for tweet in tweets_friendships[1]] 
                     botscore['Most_mentioned_Twitter_users'] = [tweet for tweet in tweets_friendships[0]] 
                     botscore['Average_tweets_per_day'] = tweets_friendships[2]
+                    botscore['Most_common_user_location'] = get_most_common_user_location(friendships)
                     political_friendship_ids[name + '_bots'].append(botscore)
                 else:
                     tweets_friendships = get_tweets_by_userid(friendships)  
                     botscore['Most_used_hashtags'] = [tweet for tweet in tweets_friendships[1]] 
                     botscore['Most_mentioned_Twitter_users'] = [tweet for tweet in tweets_friendships[0]] 
                     botscore['Average_tweets_per_day'] = tweets_friendships[2]
+                    botscore['Most_common_user_location'] = get_most_common_user_location(friendships)
                     political_friendship_ids[name].append(botscore)
 
-        tweets = get_tweets_by_userid(user_id)      
+        tweets = get_tweets_by_userid(user_id)     
+        location = get_most_common_user_location(user_id)
 
         message += "\tFriends:" + str(len(political_friendship_ids['friends']))
         message += "\tFollowers:" + str(len(political_friendship_ids['followers']))
@@ -297,7 +326,8 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
                 'Most_mentioned_Twitter_users' : {
                     '$each' : tweets[0]
                 },
-                'Average_tweets_per_day' : tweets[2]
+                'Average_tweets_per_day' : tweets[2],
+                'Most_common_user_location': location
 
             }
         }
@@ -321,13 +351,22 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
     #print(message + "\tMa:", res.matched_count, "\tMo:", res.modified_count, "\tUp:", res.upserted_id, ";\tDONE!")
     return True
 
+
+
+
+
+
+
+
+
+
 # update the database with botscore
 user = get_user(sys.argv[1])
 botscore_to_mongodb(user.id, db.users)
 total_users = get_user_ids(db.users)
 # upodate the database with friendships
 get_friendships_by_userid(user.id, total_users, db.users)
-
+#get_most_common_user_location(user.id)
 
 
 

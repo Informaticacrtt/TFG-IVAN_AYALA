@@ -1,0 +1,422 @@
+/* ----------------------------------------------------
+Stylesheet for http://www.YourProject.com
+
+Updated: 11/20/2012
+Author: Eric Watson
+Website: http://www.websitecodetutorials.com
+------------------------------------------------------- 
+: Site Colors : 
+background ... #CCC;
+
+: Table Of Contents :
+Resets
+Defaults
+Typography
+Forms
+Layout
+Links
+Menus
+Global Classes
+Content
+---------------------------------------------------- */
+
+
+/* -------------------- Resets --------------------- */
+
+body,
+form,
+fieldset,
+ol,
+ul,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    border: 0;
+    /* kills Gecko bug when img's are placed inside links */
+    vertical-align: bottom;
+    /* set vertical align to bottom for IE */
+}
+
+
+/* ------------------- Defaults ------------------- */
+
+html {
+    height: 100%;
+    overflow: auto;
+    /* triggers 100% height in Opera 9.5 */
+    overflow-y: scroll;
+    /* creates a horizontal scrollbar, for a more consistent look & feel */
+}
+
+body {
+    height: 100%;
+    /* helps make height 100% */
+    ∫ font: 100%/1.5 Arial, Helvetica, sans-serif;
+    /* 100% = 16px, 93.75% = 15px, 87.5% = 14px, 81.25% = 13px, 75% = 12px - font-size in % prevents IE's resize bug */
+    background: #FDFDFD;
+    color: #333;
+}
+
+
+/* ------------------ Typography ------------------- */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    margin: 0 0 1em;
+}
+
+p,
+ul,
+ol {
+    font-size: 1em;
+}
+
+ul {
+    margin: 0 0 1em 25px;
+    list-style: none;
+}
+
+h1 {
+    font-size: 1.6em;
+}
+
+h2 {
+    font-size: 1.5em;
+}
+
+h3 {
+    font-size: 1.4em;
+}
+
+h4 {
+    font-size: 1.3em;
+}
+
+h5 {
+    font-size: 1.2em;
+}
+
+h6 {
+    font-size: 1.1em;
+}
+
+
+/* -------------------- Forms ---------------------- */
+
+fieldset {
+    border: none;
+}
+
+form :focus {
+    outline: 0;
+    /* removes Safari's blue border */
+}
+
+input,
+select,
+textarea {
+    font-size: 1em;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+label {
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+input {
+    vertical-align: middle;
+}
+
+textarea {
+    overflow: auto;
+    /* removes scrollbar from IE when none is needed */
+}
+
+
+/* -------------------- Layout --------------------- */
+
+#wrap {
+    margin: 0 auto;
+    /* centers layout */
+    min-height: 100%;
+    /* height 100% in all modern browsers */
+}
+
+#head {}
+
+#nav {}
+
+#content {}
+
+#left {
+    float: left;
+}
+
+#foot {
+    clear: both;
+}
+
+
+/* ------------------- Links ---------------------- */
+
+a {
+    text-decoration: underline;
+    color: #000;
+    outline: 0;
+    /* removes dotted border */
+}
+
+a:visited {
+    color: #999;
+}
+
+a:hover,
+a:focus,
+a:active {
+    text-decoration: none;
+    /* add-custom:outline-rule-here; */
+}
+
+
+/* --------------------- Menus -------------------- */
+
+
+/* Main Menu */
+
+#nav {}
+
+#nav li {}
+
+#nav a {
+    text-decoration: none;
+}
+
+#nav a:hover,
+#nav a:focus,
+#nav a:active {}
+
+
+/* Foot Menu */
+
+#foot ul {}
+
+#foot li {}
+
+#foot a {
+    text-decoration: none;
+}
+
+#foot a:hover,
+#foot a:focus,
+#foot a:active {}
+
+
+/* ---------------- Global Classes --------------- */
+
+.clear {
+    clear: both;
+    line-height: 0;
+    height: 0;
+    font-size: 0;
+}
+
+.clearfix:after {
+    content: " ";
+    display: block;
+    height: 0;
+    font-size: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.clearfix {
+    display: inline-block;
+}
+
+
+/* mac hide \*/
+
+* html .clearfix {
+    height: 1%;
+}
+
+.clearfix {
+    display: block;
+}
+
+
+/* End hide */
+
+
+/* ------------------- Content ------------------- */
+
+#background {
+    display: block;
+    height: 100vh;
+    background-color: #d6e9fc;
+    background-position: 9px 0px;
+    background-repeat: no-repeat;
+    overflow: hidden;
+    padding: 0;
+}
+
+#botChecker {
+    height: 100vh;
+    padding: 40px;
+    display: block;
+    text-align: center;
+    background-color: #d6e9fc;
+}
+
+#footer {
+    text-align: center;
+}
+
+h1 {
+    padding: 10px;
+}
+
+#post {
+    display: block;
+    text-align: center;
+    background-color: #f0f7fb;
+}
+
+.fa-twitter-square {
+    display: flex;
+    padding: 10px;
+    font-size: 4em;
+}
+
+#user {
+    display: flex;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    height: 90px;
+    width: 100%;
+}
+
+#user-info {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+}
+
+#statistics {
+    display: flex;
+}
+
+#botscore {
+    padding: 10px;
+}
+
+#average {
+    display: block;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    box-sizing: content-box;
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: content-box;
+}
+
+.fa-comment-alt {
+    font-size: 2em;
+}
+
+span.blue {
+    background: #5178D0;
+    border-radius: 0.8em;
+    -moz-border-radius: 0.8em;
+    -webkit-border-radius: 0.8em;
+    color: #ffffff;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 1.6em;
+    margin-right: 15px;
+    text-align: center;
+    width: 3em;
+    font-size: 25px;
+}
+
+#most_mentioned_Twitter_users {
+    display: block;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    box-sizing: content-box;
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: content-box;
+}
+
+#most_used_hashtags {
+    display: block;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    box-sizing: content-box;
+    text-align: center;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: content-box;
+}
+
+td {
+    padding: 0 20px;
+}
+
+#chart {
+    text-align: center;
+}
+
+#location {
+    display: block;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    box-sizing: content-box;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: content-box;
+}
