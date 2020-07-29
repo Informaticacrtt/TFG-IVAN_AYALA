@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Requests\FormValidateRequest;
 use App\User;
-use ArielMejiaDev\LarapexCharts;
 use Khill\Lavacharts\Lavacharts;
 
 require '../vendor/autoload.php';
@@ -18,91 +16,97 @@ class SearchController extends Controller
     public function show(FormValidateRequest $request)
     {
 
-        if (!$request->has('username') && !$request->has('userID'))
+        if (!$request->has('username') && !$request->has('userID')) {
             return back()->withInput();
-        else {
+        } else {
             # We obtain user's information from our db.
             $result = User::getInfo($request);
-            $username = $result->scores['user']['screen_name'];
 
-            $most_mentioned_Twitter_users =
-                $id = $result->scores['user']['id_str'];
-            # In order to show Bot's core
-            $lava = new Lavacharts;
+            # First of all, we've to check if a problem occurred
+            if ($result->error != "None") {
+                return view('error', compact('result'));
+            } else {
 
-            $temps = $lava->DataTable();
+                # In order to show Bot's core
+                $lava = new Lavacharts;
 
-            $temps->addStringColumn('Type')
-                ->addNumberColumn('Value')
-                ->addRow(['Bot\'score (%)', $result->scores['cap']['universal'] * 100]);
+                $temps = $lava->DataTable();
 
-            Lava::GaugeChart(
-                'Chart',
-                $temps,
-                [
-                    'width'      => 400,
-                    'greenFrom'  => 0,
-                    'greenTo'    => 43,
-                    'yellowFrom' => 43,
-                    'yellowTo'   => 80,
-                    'redFrom'    => 80,
-                    'redTo'      => 100,
-                    'majorTicks' => [
-                        'Human',
-                        'Bot'
-                    ]
-                ]
-            );
+                $temps->addStringColumn('Type')
+                    ->addNumberColumn('Value')
+                    ->addRow(['Bot\'score (%)', $result->scores['cap']['universal'] * 100]);
 
-
-            # No we have to build the charts.   
-            $nfollowers = count($result->followers);
-            $nfolowers_bots = count($result->followers_bots);
-            $nfriends = count($result->friends);
-            $nfriends_bots = count($result->friends_bots);
-            $chart = app()->chartjs
-                ->name('pieChartTest')
-                ->type('pie')
-                ->size(['width' => 400, 'height' => 200])
-                ->labels(['Followers-bots(' . $nfolowers_bots . ')', 'Friends-bots(' . $nfriends_bots . ')'])
-                ->datasets([
+                Lava::GaugeChart(
+                    'Chart',
+                    $temps,
                     [
-                        'backgroundColor' => ['#FF6384', '#36A2EB'],
-                        'hoverBackgroundColor' => ['#FF6384', '#36A2EB'],
-                        'data' => [$nfolowers_bots, $nfriends_bots]
+                        'width' => 400,
+                        'greenFrom' => 0,
+                        'greenTo' => 43,
+                        'yellowFrom' => 43,
+                        'yellowTo' => 80,
+                        'redFrom' => 80,
+                        'redTo' => 100,
+                        'majorTicks' => [
+                            'Human',
+                            'Bot',
+                        ],
                     ]
-                ])
-                ->optionsRaw("{
+                );
+
+                $friends_analyzed = count($result ->friends_analyzed)+count($result->friends_bots_analyzed);
+                $followers_analyzed = count($result ->followers_analyzed)+count($result->followers_bots_analyzed);
+                # No we have to build the charts.
+                $chart = app()->chartjs
+                                ->name('barChartTest')
+                                ->type('bar')
+                                ->size(['width' => 400, 'height' => 200])
+                                ->labels(['Bot\'s comparaison from '.$friends_analyzed. ' friends & '.$followers_analyzed. ' followers analyzed.'])
+                                ->datasets([
+                                    [
+                                        "label" => "Friends",
+                                        'backgroundColor' => ['rgba(255, 99, 132, 1)'],
+                                        'data' => [$friends_analyzed]
+                                    ],
+                                    [
+                                        "label" => "Friends\'bots",
+                                        'backgroundColor' => ['rgba(0, 130, 244, 1)'],
+                                        'data' => [count($result->friends_bots_analyzed)]
+                                    ],
+                                    [
+                                        "label" => "Followers",
+                                        'backgroundColor' => ['rgba(244, 236, 0, 1)'],
+                                        'data' => [$followers_analyzed]
+                                    ],
+                                    [
+                                        "label" => "Followers\'bots",
+                                        'backgroundColor' => ['rgba(40, 244, 0, 1)'],
+                                        'data' => [count($result->followers_bots_analyzed)]
+                                    ],
+                                ])
+                                ->options([]);
                 
-            }");
 
-            $average_tweets_per_day = $result->Average_tweets_per_day['0'];
+                # In order to obtain user's locations
+                
+                /*
+                
+                $i = 0;
+                while ($i < count($result->followers)) {
+                    $locations[] = $result->followers[$i]['Most_common_user_location'];
+                    $i++;
+                }
 
-            # In order to obtain user's locations
-            $locations = [];
-            
-            
-            $location_user[] = $result->Most_common_user_location[0] ;
+                while ($i < count($result->friends)) {
+                    $locations[] = $result->friends[$i]['Most_common_user_location'];
+                    $i++;
+                }
 
+                $locations = array_unique($locations);
+                **/
 
-
-            $i = 0;
-            while ($i < count($result->followers)) {
-                $locations[] = $result->followers[$i]['Most_common_user_location'];
-                $i++;
+                return view('search', compact('result', 'chart', 'temps'));
             }
-
-            while ($i < count($result->friends)) {
-                $locations[] = $result->friends[$i]['Most_common_user_location'];
-                $i++;
-            }
-
-            $locations = array_unique($locations);
-
-
-
-
-            return view('search', compact('result', 'nfollowers', 'nfriends', 'username', 'id', 'average_tweets_per_day', 'chart', 'temps', 'location_user'));
         }
     }
 }

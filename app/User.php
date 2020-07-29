@@ -58,7 +58,7 @@ class User extends Eloquent implements Authenticatable
         if ($request-> has('username')){
             // Search by username
             foreach ($users as $user) {
-                if (strtoupper($user->scores['user']['screen_name']) == strtoupper($request->username))
+                if (strtoupper($user->username) == strtoupper($request->username))
                     return $user;
             }
 
@@ -79,7 +79,8 @@ class User extends Eloquent implements Authenticatable
 
             // Search by username
             foreach ($users as $user) {
-                if (strtoupper($user->scores['user']['screen_name']) == strtoupper($request->username))
+                
+                if (strtoupper($user->username) == strtoupper($request->username))
                     return $user;
             }
 
@@ -88,7 +89,7 @@ class User extends Eloquent implements Authenticatable
         else if ($request-> has('userID')){
             // Search by id
             foreach ($users as $user) {
-                if ($user->scores['user']['id_str']  == $request->userID)
+                if ($user-> id  == $request->userID)
                     return $user;
             }
             // In this case, the user doesn't appear at database.
@@ -107,7 +108,7 @@ class User extends Eloquent implements Authenticatable
 
             // Search by id
             foreach ($users as $user) {
-                if ($user->scores['user']['id_str']  == $request->userID)
+                if ($user-> id  == $request-> userID)
                     return $user;
             }
 

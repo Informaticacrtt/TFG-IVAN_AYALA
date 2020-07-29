@@ -304,6 +304,22 @@ h1 {
     font-size: 4em;
 }
 
+.fa-exclamation-triangle {
+    display: block;
+    padding: 10px;
+    font-size: 4em;
+    text-align: center;
+}
+
+.fa-lock{
+    display: block;
+    padding: 10px;
+    font-size: 2em;
+    text-align: center;
+
+}
+
+
 #user {
     display: flex;
     -moz-border-radius: 6px;
@@ -314,7 +330,37 @@ h1 {
     border-radius: 6px;
     line-height: 18px;
     height: 90px;
-    width: 100%;
+    
+}
+
+#profile{
+    display: block;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: content-box;
+
+    
+}
+
+#location {
+    display: block;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    background-color: #f0f7fb;
+    background-repeat: no-repeat;
+    border: solid 1px #92caf1;
+    border-radius: 6px;
+    line-height: 18px;
+    padding: 10px;
+    margin: 10px;
+    box-sizing: content-box;
 }
 
 #user-info {
@@ -396,6 +442,7 @@ span.blue {
     padding: 10px;
     margin: 10px;
     box-sizing: content-box;
+    text-align: center;
 }
 
 td {
@@ -403,20 +450,15 @@ td {
 }
 
 #chart {
+    padding: 10px;
+    margin: 10px;
     text-align: center;
 }
 
-#location {
+.fa-robot{
     display: block;
-    -moz-border-radius: 6px;
-    -webkit-border-radius: 6px;
-    background-color: #f0f7fb;
-    background-repeat: no-repeat;
-    border: solid 1px #92caf1;
-    border-radius: 6px;
-    line-height: 18px;
-    box-sizing: content-box;
     padding: 10px;
-    margin: 10px;
-    box-sizing: content-box;
+    font-size: 2em;
+    text-align: center;
 }
+
