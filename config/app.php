@@ -181,7 +181,6 @@ return [
         // Charts
         ConsoleTVs\Charts\ChartsServiceProvider::class,
         Fx3costa\LaravelChartJs\Providers\ChartjsServiceProvider::class,
-        Khill\Lavacharts\Laravel\LavachartsServiceProvider::class,
 
 
 
@@ -237,6 +236,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Charts' => ConsoleTVs\Charts\Facades\Charts::class,
         'Lava' => Khill\Lavacharts\Laravel\LavachartsFacade::class,
+
     ],
 
 ];

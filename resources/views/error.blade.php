@@ -16,7 +16,7 @@
     <div id="botChecker">
         
         <i class="fas fa-exclamation-triangle"></i>
-        <h1> Error : {{$result -> error}}</h1>
+        <h1> Error : {{$result -> Error}}</h1>
         @if ($result -> protected)
             <i class="fas fa-lock"> Account is protected</i>
         @endif

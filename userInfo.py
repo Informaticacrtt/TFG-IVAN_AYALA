@@ -6,6 +6,8 @@ import re
 import random
 import json
 import numpy as np
+from datetime import datetime
+
 
 # Botometer API
 import botometer
@@ -49,22 +51,25 @@ MINIMUM_BOTSCORE = 0.43
 def get_user(user):
 
     message = "Checking:" + str(user) + " "
+
+    botometer_instance = random.choice(keys)
+    consumer_key = botometer_instance.consumer_key
+    consumer_secret = botometer_instance.consumer_secret
+
     try:
         # Tweepy request
-        auth = tweepy.OAuthHandler(
-            TWITTER_DEV_CONSUMER_KEY, TWITTER_DEV_CONSUMER_SECRET)
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(TWITTER_DEV_ACCESS_TOKEN,
                               TWITTER_DEV_ACCESS_TOKEN_SECRET)
         api = tweepy.API(auth, wait_on_rate_limit=True)
 
-        # Obtain by username
-        return api.get_user(user)
+        # Obtain by username or id
+        return np.array([True, api.get_user(user)])
 
     except Exception as e:
-        print(message+"Exception. User:", user, "API:",
-              TWITTER_DEV_CONSUMER_KEY, "Message:", e)
-        return False
-
+        message = "Exception. User: " + user + " API: " + \
+            TWITTER_DEV_CONSUMER_KEY + " Message:" + str(e)
+        return np.array([False, message])
 
 def make_objid(text):
     """Makes an ObjectId of 4 bytes
@@ -81,8 +86,7 @@ def make_objid(text):
         print(text, ex)
         return None
 
-
-def get_botscore_by_userid(user_id):
+def get_botscore_by_userid(user):
     """
     Collects the botscore from Botometer
 
@@ -90,12 +94,18 @@ def get_botscore_by_userid(user_id):
     user_id -- Twitter users' identificator
     """
 
+    user_id = user.id
     try:
         botometer_instance = random.choice(keys)
         consumer_key = botometer_instance.consumer_key
         result = botometer_instance.check_account(user_id)
         return UpdateOne({'_id': make_objid(user_id)},
-                         {'$set': {'scores': result}},
+                         {'$set': {
+                             'scores': result,
+                             'screen_name': user.screen_name,
+                             'id': user.id,
+                             'error': 'None'
+                         }},
                          upsert=True
                          )
     except Exception as e:
@@ -108,36 +118,50 @@ def get_botscore_by_userid(user_id):
         if auth_match:
             return UpdateOne({'_id': make_objid(user_id)},
                              {'$unset': {'scores': ""},
-                              '$set': {'error': 'not authorized'},
+                              '$set': {'screen_name': user.screen_name,
+                                       'id': user.id,
+                                       'error': 'not authorized'},
                               '$push': {'error_key_used': consumer_key}},
                              upsert=True
                              )
         elif overCapacity_match:
             return UpdateOne({'_id': make_objid(user_id)},
                              {'$unset': {'scores': ""},
-                              '$set': {'error': 'over capacity'},
+                              '$set': {'screen_name': user.screen_name,
+                                       'id': user.id,
+                                       'error': 'over capacity'},
                               '$push': {'error_key_used': consumer_key}},
                              upsert=True
                              )
         elif timeline_match:
-            #print("User", user_id, " has no tweets in timeline")
+            # print("User", user_id, " has no tweets in timeline")
             return UpdateOne({'_id': make_objid(user_id)},
                              {'$unset': {'scores': ""},
-                              '$set': {'error': 'has no tweets in timeline'}},
+                              '$set': {'screen_name': user.screen_name,
+                                       'id': user.id,
+                                       'error': 'has no tweets in timeline'}},
                              upsert=True
                              )
         elif notExist_match:
-            #print("User", user_id, " does not exists anymore")
+            # print("User", user_id, " does not exists anymore")
             return UpdateOne({'_id': make_objid(user_id)},
                              {'$unset': {'scores': ""},
-                              '$set': {'ignore': True, 'ignore_reason': 'does not exists anymore'}},
+                              '$set': {'error': 'does not exists anymore'}},
                              upsert=True
                              )
         else:
             print("Exception. User:", user_id,
                   "API:", consumer_key, "Message:", e)
-        return None
 
+            return UpdateOne({'_id': make_objid(user_id)},
+                             {'$unset': {'scores': ""},
+                              '$set': {
+                                 'screen_name': user.screen_name,
+                                 'id': user.id,
+                                 'error': str(e)}
+                              },
+                             upsert=True
+                             )
 
 def botscore_to_mongodb(user, user_collection):
     """
@@ -148,57 +172,117 @@ def botscore_to_mongodb(user, user_collection):
     user_collection -- MongoDB Users' Collection
     """
 
-    #print('Getting user botscore...')
+    # print('Getting user botscore...')
 
     botscore = get_botscore_by_userid(user)
-    operations = [botscore]
-    user_collection.bulk_write(operations)
+    user_collection.bulk_write([botscore])
 
+def profile_info_to_mongodb(user, user_collection):
 
-def get_user_ids(user_collection):
-    """
-    Extracts the ObjectID of all users
+    filter_uid = {'_id': make_objid(user.id)}
+    botometer_instance = random.choice(keys)
+    consumer_key = botometer_instance.consumer_key
+    consumer_secret = botometer_instance.consumer_secret
 
-    Keyword arguments:
-    user_collection -- MongoDB Users' Collection
-    """
+    try:
+        # Tweepy request
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+        auth.set_access_token(TWITTER_DEV_ACCESS_TOKEN,
+                              TWITTER_DEV_ACCESS_TOKEN_SECRET)
+        api = tweepy.API(auth, wait_on_rate_limit=True)
 
-    total_users = list(user_collection.find({}, {'_id': 1}))
-    total_users = [u['_id'] for u in total_users]
-    return total_users
+        filter_content = {
+            '$set': {
+                'name': user.name,
+                'screen_name': user.screen_name,
+                'id': user.id,
+                'description': user.description,
+                'verified': user.verified,
+                'url': user.url,
+                'location': user.location,
+                'created_at': user.created_at,
+                'profile_image_url_https': user.profile_image_url_https,
+                'profile_banner_url': user.profile_banner_url,
+                'listed_count': user.listed_count,
+                'favourites_count': user.favourites_count,
+                'protected': user.protected,
+                'friends': user.friends_count,
+                'most_recent_post': str(api.user_timeline(user.id, count=1)[0].created_at),
+                'followers': user.followers_count,
+                'followers_ratio': round((float(user.followers_count)/float(user.friends_count)), 2),
+                'average_tweets_per_day': get_average_tweets_per_day(user),
+                'most_common_user_location': get_most_common_user_location(api, user),
+                'statuses_count': user.statuses_count
+                # 'retweet_count': tweets[3], #fix
+                # 'retweets_of_me' : len(tweets[4]) #fix
+            }
+        }
+        user_collection.update_one(filter_uid, filter_content, upsert=True)
 
+    except Exception as e:
+        print("Error profile_info_to_mongodb")
 
-def get_tweets_by_userid(user_id):
+def get_average_tweets_per_day(user):
+
+    tweets = user.statuses_count
+    account_created_date = user.created_at
+    delta = datetime.utcnow() - account_created_date
+    account_age_days = delta.days
+    average_tweets = 0
+
+    if account_age_days > 0:
+        average_tweets = round((float(tweets)/float(account_age_days)), 2)
+
+    return average_tweets
+# Falta tratar errores
+def get_most_common_user_location(api, user):
+
+    try:
+        message = "Checking:" + str(user.id) + " "
+        tweets_count = user.statuses_count
+
+        if tweets_count > 0:
+            # Collect tweets
+            tweets = api.user_timeline(id=user.id)
+
+            locations = []
+
+            for tweet in tweets:
+                locations.append(tweet.user.location)
+
+            return Counter(locations).most_common(1)[0][0]
+        else:
+            return np.array([])
+
+    except tweepy.TweepError as err:
+        print(message+"get_most_common_user_location - tweepy.TweepError=", err)
+
+    except Exception as e:
+        print(message+" get_most_common_user_location - Exception. User:", user.id, "API:",
+              TWITTER_DEV_CONSUMER_KEY, "Message:", e)
+# Falta tratar errores
+def most_used_hashtags_and_mentioned_Twitter_users_to_mongodb(user, user_collection):
+    filter_uid = {'_id': make_objid(user.id)}
+    botometer_instance = random.choice(keys)
+    consumer_key = botometer_instance.consumer_key
+    consumer_secret = botometer_instance.consumer_secret
     try:
        # Tweepy request
-        auth = tweepy.OAuthHandler(
-            TWITTER_DEV_CONSUMER_KEY, TWITTER_DEV_CONSUMER_SECRET)
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(TWITTER_DEV_ACCESS_TOKEN,
                               TWITTER_DEV_ACCESS_TOKEN_SECRET)
         api = tweepy.API(auth)
-        message = "Checking:" + str(user_id) + " "
+        message = "Checking:" + str(user.id) + " "
 
-        user = api.get_user(user_id)
         tweets = user.statuses_count
 
         if tweets > 0:
-            account_created_date = user.created_at
-            delta = datetime.utcnow() - account_created_date
-            account_age_days = delta.days
-            #print("Account age (in days): " + str(account_age_days))
-            average_tweets = 0
-            if account_age_days > 0:
-                average_tweets = "%.2f" % (
-                    float(tweets)/float(account_age_days))
-            #print("Average tweets per day: " + "%.2f"%(float(tweets)/float(account_age_days)))
-
             hashtags = []
             mentions = []
-            tweet_count = 0
             end_date = datetime.utcnow() - timedelta(days=30)
 
-            for status in Cursor(api.user_timeline, id=user.id).items():
-                tweet_count += 1
+            for status in Cursor(api.user_timeline, id=user.id, include_rts=True).items(200):
+
                 if hasattr(status, "entities"):
                     entities = status.entities
                     if "hashtags" in entities:
@@ -215,47 +299,62 @@ def get_tweets_by_userid(user_id):
                                     name = ent["screen_name"]
                                     if name is not None:
                                         mentions.append(name)
+
                 if status.created_at < end_date:
                     break
 
-            return np.array([Counter(mentions).most_common(10), Counter(hashtags).most_common(10), average_tweets])
-        else:
-            return np.array([None, None, None])
+            filter_content = {
+                '$push': {
+                    'most_used_hashtags': {
+                        '$each': Counter(mentions).most_common(10)
+                    },
+                    'most_mentioned_Twitter_users': {
+                        '$each': Counter(hashtags).most_common(10)
+                    },
+                }
+            }
+            user_collection.update_one(filter_uid, filter_content, upsert=True)
 
     except tweepy.TweepError as err:
         print(message+"tweepy.TweepError=", err)
 
     except Exception as e:
-        print(message+"Exception. User:", user_id, "API:",
+        print(message+"Exception. User:", user.id, "API:",
               TWITTER_DEV_CONSUMER_KEY, "Message:", e)
+# Falta tratar errores
+def average_of_tweets_by_day_of_week_to_mongodb(user_id, user_collection):
 
-
-def get_most_common_user_location(user_id):
+    filter_uid = {'_id': make_objid(user_id)}
+    botometer_instance = random.choice(keys)
+    consumer_key = botometer_instance.consumer_key
+    consumer_secret = botometer_instance.consumer_secret
+    message = "Checking:" + str(user_id) + " "
 
     try:
-       # Tweepy request
-        auth = tweepy.OAuthHandler(
-            TWITTER_DEV_CONSUMER_KEY, TWITTER_DEV_CONSUMER_SECRET)
+        # Tweepy request
+        auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
         auth.set_access_token(TWITTER_DEV_ACCESS_TOKEN,
                               TWITTER_DEV_ACCESS_TOKEN_SECRET)
-        api = tweepy.API(auth)
-        message = "Checking:" + str(user_id) + " "
+        api = tweepy.API(auth, wait_on_rate_limit=True)
 
-        user = api.get_user(user_id)
-        tweets_count = user.statuses_count
+        recents_tweets = api.user_timeline(id=user_id, count=200)
+        tweets = [0, 0, 0, 0, 0, 0, 0, 0]
+        analyzed = 0
+        for tweet in recents_tweets:
+            date = (tweet.created_at).weekday()
+            tweets[date-1] += 1
+            analyzed += 1
 
-        if tweets_count > 0:
-            # Collect tweets
-            tweets = api.user_timeline(id=user_id)
+        tweets[7] = analyzed
 
-            locations = []
-
-            for tweet in tweets:
-                locations.append(tweet.user.location)
-
-            return Counter(locations).most_common(1)[0][0]
-        else:
-            return np.array([])
+        filter_content = {
+            '$push': {
+                'average_of_tweets_by_day_of_week': {
+                        '$each': tweets
+                }
+            }
+        }
+        user_collection.update_one(filter_uid, filter_content, upsert=True)
 
     except tweepy.TweepError as err:
         print(message+"tweepy.TweepError=", err)
@@ -264,15 +363,13 @@ def get_most_common_user_location(user_id):
         print(message+"Exception. User:", user_id, "API:",
               TWITTER_DEV_CONSUMER_KEY, "Message:", e)
 
-
-def get_friendships_by_userid(user_id, total_users, user_collection):
+def friendships_by_userid_to_mongodb(user_id, user_collection):
     """
     Consults followers and followings of a user and save in MongoDB
     those who are within the total recollected sample of users.
 
     Keyword arguments:
     user_id -- Twitter user's identificator
-    total_users -- List of the total of Twitter users' identificators within our database
     user_collection -- MongoDB Users' Collection
     """
     botometer_instance = random.choice(keys)
@@ -295,33 +392,30 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
 
         if not protected_user == True:
 
+            print("not protected")
+
             political_friendship_ids = {
                 'friends': [],
                 'followers': [],
                 'friends_bots': [],
-                'followers_bots': [],
-                'average_tweets_per_day': [],
-                'most_used_hashtags': [],
-                'most_mentioned_Twitter_users': [],
-                'most_common_user_location': []
+                'followers_bots': []
             }
 
-            tweets = []
-            location = []
-            tweets = get_tweets_by_userid(user_id)
-            location = get_most_common_user_location(user_id)
-
             for name, method in zip(['friends', 'followers'], [api.friends_ids, api.followers_ids]):
-                #print("\tQuerying", name, method)
-                for friendships in tweepy.Cursor(method, user_id=user_id).items(200):
+                # print("\tQuerying", name, method)
+                for friendships in tweepy.Cursor(method, user_id=user_id).items(70):
 
                     # We check if the account is private
                     user_friendships = api.get_user(friendships)
                     protected_friendships = user_friendships.protected
 
                     if not protected_friendships == True:
+
+                        botometer_instance_friendships = random.choice(keys)
+
                         try:
-                            botscore = botometer_instance.check_account(
+
+                            botscore = botometer_instance_friendships.check_account(
                                 friendships)
                             # We are first interested in bot's friends
                             botscore['_id'] = make_objid(friendships)
@@ -362,21 +456,7 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
             message += "\tFollowers_bots:" + \
                 str(len(political_friendship_ids['followers_bots']))
 
-
             filter_content = {
-                '$set': {
-                    'username': user.screen_name,
-                    'id': user.id,
-                    'description': user.description,
-                    'url': user.url,
-                    'created_at': user.created_at,
-                    'error': 'None',
-                    'protected': protected_user,
-                    'friends': user.friends_count,
-                    'followers' : user.followers_count,
-                    'average_tweets_per_day': tweets[2],
-                    'most_common_user_location': location
-                },
                 '$push': {
                     'friends_analyzed': {
                         '$each': political_friendship_ids['friends']
@@ -389,21 +469,7 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
                     },
                     'followers_bots_analyzed': {
                         '$each': political_friendship_ids['followers_bots']
-                    },
-                    'most_used_hashtags': {
-                        '$each': tweets[1]
-                    },
-                    'most_mentioned_Twitter_users': {
-                        '$each': tweets[0]
                     }
-                }
-            }
-        else:
-            filter_content = {
-                '$set': {
-                    'username': user.screen_name,
-                    'id': user.id,
-                    'protected': protected_user,
                 }
             }
 
@@ -426,9 +492,33 @@ def get_friendships_by_userid(user_id, total_users, user_collection):
     return False
 
 
-# update the database with botscore
-user = get_user(sys.argv[1])
-botscore_to_mongodb(user.id, db.users)
-total_users = get_user_ids(db.users)
-# upodate the database with friendships
-get_friendships_by_userid(user.id, total_users, db.users)
+
+
+def main():
+
+    # We try to get user
+    result = get_user(sys.argv[1])
+    user_collection = db.users
+    # If user is founded
+    if (result[0] != 'False'):
+        # update the database with botscore
+        botscore_to_mongodb(result[1], user_collection)
+        found = user_collection.find_one(
+            {'_id': make_objid(result[1].id), 'error': 'None'})
+        # If db added botscore correctly to user
+        if (found is not None):
+            profile_info_to_mongodb(result[1], user_collection)
+            most_used_hashtags_and_mentioned_Twitter_users_to_mongodb(
+                result[1], user_collection)
+            average_of_tweets_by_day_of_week_to_mongodb(result[1].id,user_collection)
+            print ("Analizaremos sus amigos")
+            friendships_by_userid_to_mongodb(result[1].id, user_collection)
+            # update the database with friendships
+            # get_friendships_by_userid(user.id, total_users, db.users)
+
+    else:
+        print("get_user fail")
+        return result[1]
+
+
+main()

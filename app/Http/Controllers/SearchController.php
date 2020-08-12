@@ -6,6 +6,7 @@ use App\Http\Requests\FormValidateRequest;
 use App\User;
 use Khill\Lavacharts\Lavacharts;
 
+
 require '../vendor/autoload.php';
 
 use Lava;
@@ -19,6 +20,8 @@ class SearchController extends Controller
         if (!$request->has('username') && !$request->has('userID')) {
             return back()->withInput();
         } else {
+
+          
             # We obtain user's information from our db.
             $result = User::getInfo($request);
 
@@ -27,10 +30,12 @@ class SearchController extends Controller
                 return view('error', compact('result'));
             } else {
 
-                # In order to show Bot's core
-                $lava = new Lavacharts;
+                
 
-                $temps = $lava->DataTable();
+                # In order to show Bot's core
+
+
+                $temps = Lava::DataTable();
 
                 $temps->addStringColumn('Type')
                     ->addNumberColumn('Value')
@@ -54,58 +59,129 @@ class SearchController extends Controller
                     ]
                 );
 
-                $friends_analyzed = count($result ->friends_analyzed)+count($result->friends_bots_analyzed);
-                $followers_analyzed = count($result ->followers_analyzed)+count($result->followers_bots_analyzed);
+                $friends_analyzed = count($result->friends_analyzed) + count($result->friends_bots_analyzed);
+                $followers_analyzed = count($result->followers_analyzed) + count($result->followers_bots_analyzed);
                 # No we have to build the charts.
                 $chart = app()->chartjs
-                                ->name('barChartTest')
-                                ->type('bar')
-                                ->size(['width' => 400, 'height' => 200])
-                                ->labels(['Bot\'s comparaison from '.$friends_analyzed. ' friends & '.$followers_analyzed. ' followers analyzed.'])
-                                ->datasets([
-                                    [
-                                        "label" => "Friends",
-                                        'backgroundColor' => ['rgba(255, 99, 132, 1)'],
-                                        'data' => [$friends_analyzed]
-                                    ],
-                                    [
-                                        "label" => "Friends\'bots",
-                                        'backgroundColor' => ['rgba(0, 130, 244, 1)'],
-                                        'data' => [count($result->friends_bots_analyzed)]
-                                    ],
-                                    [
-                                        "label" => "Followers",
-                                        'backgroundColor' => ['rgba(244, 236, 0, 1)'],
-                                        'data' => [$followers_analyzed]
-                                    ],
-                                    [
-                                        "label" => "Followers\'bots",
-                                        'backgroundColor' => ['rgba(40, 244, 0, 1)'],
-                                        'data' => [count($result->followers_bots_analyzed)]
-                                    ],
-                                ])
-                                ->options([]);
-                
+                    ->name('barChartTest')
+                    ->type('bar')
+                    ->size(['width' => 500, 'height' => 300])
+                    ->labels(['Bot\'s comparaison from ' . $friends_analyzed . ' friends & ' . $followers_analyzed . ' followers analyzed.'])
+                    ->datasets([
+                        [
+                            "label" => "Friends",
+                            'backgroundColor' => ['rgba(255, 99, 132, 1)'],
+                            'data' => [$friends_analyzed]
+                        ],
+                        [
+                            "label" => "Friends\'bots",
+                            'backgroundColor' => ['rgba(0, 130, 244, 1)'],
+                            'data' => [count($result->friends_bots_analyzed)]
+                        ],
+                        [
+                            "label" => "Followers",
+                            'backgroundColor' => ['rgba(244, 236, 0, 1)'],
+                            'data' => [$followers_analyzed]
+                        ],
+                        [
+                            "label" => "Followers\'bots",
+                            'backgroundColor' => ['rgba(40, 244, 0, 1)'],
+                            'data' => [count($result->followers_bots_analyzed)]
+                        ],
+                    ])
+                    ->options([]);
 
-                # In order to obtain user's locations
-                
-                /*
-                
-                $i = 0;
-                while ($i < count($result->followers)) {
-                    $locations[] = $result->followers[$i]['Most_common_user_location'];
-                    $i++;
+
+                $most_mentioned_Twitter_users  = Lava::DataTable();
+
+                $most_mentioned_Twitter_users->addStringColumn('Most mentioned Twitter users')
+                    ->addNumberColumn('Count');
+
+                foreach ($result->most_mentioned_Twitter_users as $mention) {
+                    $most_mentioned_Twitter_users->addRow([ '@'.$mention[0],  $mention[1]]);
                 }
 
-                while ($i < count($result->friends)) {
-                    $locations[] = $result->friends[$i]['Most_common_user_location'];
-                    $i++;
+                Lava::BarChart(
+                    'Most mentioned Twitter users',
+                    $most_mentioned_Twitter_users,
+                    [
+                        'backgroundColor' => 'transparent',
+                        'width' => 500,
+                        'height' => 400,
+                        'title' => 'Top 10 Most mentioned Twitter users'
+
+                    ]
+                );
+
+                $hashtags  = Lava::DataTable();
+
+                $hashtags->addStringColumn('Most used hashtags')
+                    ->addNumberColumn('Count');
+
+                foreach ($result->most_used_hashtags as $hashtag) {
+                    $hashtags->addRow(['#'.$hashtag[0],  $hashtag[1]]);
                 }
 
-                $locations = array_unique($locations);
-                **/
+                Lava::BarChart(
+                    'Hashtags',
+                    $hashtags,
+                    [
+                        'backgroundColor' => 'transparent',
+                        'width' => 500,
+                        'height' => 400,
+                        'title' => 'Top 10 Most used hashtags'
 
-                return view('search', compact('result', 'chart', 'temps'));
+                    ]
+                );
+
+                
+                $average_of_tweets_by_day_of_week_chart = app()->chartjs
+                    ->name('average_of_tweets_by_day_of_week')
+                    ->type('bar')
+                    ->size(['width' => 500, 'height' => 300])
+                    ->labels(['Tweets by day of week from '.$result->average_of_tweets_by_day_of_week[7].' tweets analyzed.'])
+                    ->datasets([
+                        [
+                            "label" => "Mon",
+                            'backgroundColor' => ['rgba(255, 0, 0, 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[0]]
+                        ],
+                        [
+                            "label" => "Tue",
+                            'backgroundColor' => ['rgba(172, 255, 51, 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[1]]
+                        ],
+                        [
+                            "label" => "Wed",
+                            'backgroundColor' => ['rgba(51, 255, 240, 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[2]]
+                        ],
+                        [
+                            "label" => "Thu",
+                            'backgroundColor' => ['rgba(51, 104, 255 , 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[3]]
+                        ],
+                        [
+                            "label" => "Fri",
+                            'backgroundColor' => ['rgba(255, 141, 51, 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[4]]
+                        ],
+                        [
+                            "label" => "Sat",
+                            'backgroundColor' => ['rgba(230, 255, 51, 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[5]]
+                        ],
+                        [
+                            "label" => "Sun",
+                            'backgroundColor' => ['rgba(221, 51, 255, 0.8)'],
+                            'data' => [$result->average_of_tweets_by_day_of_week[6]]
+                        ],
+                    ])
+                    ->options([]);
+
+
+
+                return view('search2', compact('result', 'chart', 'temps', 'hashtags', 'most_mentioned_Twitter_users', 'average_of_tweets_by_day_of_week_chart'));
             }
         }
     }

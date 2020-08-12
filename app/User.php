@@ -47,7 +47,6 @@ class User extends Eloquent implements Authenticatable
     ];
 
     
-    
     public static function getInfo($request){
         // First of all, we've to check if the requested user 
         // is in our database.
@@ -58,7 +57,7 @@ class User extends Eloquent implements Authenticatable
         if ($request-> has('username')){
             // Search by username
             foreach ($users as $user) {
-                if (strtoupper($user->username) == strtoupper($request->username))
+                if (strtoupper($user->screen_name) == strtoupper($request->username))
                     return $user;
             }
 
@@ -67,20 +66,21 @@ class User extends Eloquent implements Authenticatable
             // information about the requested user. 
             $process = new Process("python3  $route {$request->username} ");
             $process->setTimeout(3600);
-            $process->run();
-
-            // executes after the command finishes
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
+            
+            try {
+                $process->mustRun();
+            
+                #echo $process->getOutput();
+            } catch (ProcessFailedException $exception) {
+                echo $exception->getMessage();
             }
 
-            #echo $process->getOutput(); 
             $users=User::all();
 
             // Search by username
             foreach ($users as $user) {
                 
-                if (strtoupper($user->username) == strtoupper($request->username))
+                if (strtoupper($user->screen_name) == strtoupper($request->username))
                     return $user;
             }
 
@@ -96,14 +96,16 @@ class User extends Eloquent implements Authenticatable
             // So, we've to use our own script in order to get all 
             // information about the requested user.   
             $process = new Process("python3 $route {$request->userID} " );
-            $process->run();
 
-            // executes after the command finishes
-            if (!$process->isSuccessful()) {
-                throw new ProcessFailedException($process);
+            try {
+                $process->mustRun();
+            
+                #echo $process->getOutput();
+            } catch (ProcessFailedException $exception) {
+                echo $exception->getMessage();
             }
+            
 
-            #echo $process->getOutput();       
             $users=User::all();
 
             // Search by id

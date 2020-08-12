@@ -15,9 +15,17 @@
 <body>
 
     <div id="background">
+
         <div id="user">
             <i class="fab fa-twitter-square"></i>
             <div id="user-info">
+            <?php
+                $imageData = base64_encode(file_get_contents($result -> profile_banner_url));
+                echo '<img src="data:image/jpeg;base64,'.$imageData.'" style="width:500px;height:200px;>';
+                $imageData = base64_encode(file_get_contents($result -> profile_image_url));
+                echo '<img src="data:image/jpeg;base64,'.$imageData.'" style="width:30px;height:30px;>';
+
+            ?>
                 <p><b>{{$result -> username}}'s statistics / ID: {{$result -> id}}<b></p>
                 <p><b>Followers: {{$result -> followers}} Friends: {{$result -> friends}}</b></p>
             </div>
