@@ -8,136 +8,191 @@
     <link href="{{ asset('css/styles.css') }}" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
     <script src="https://kit.fontawesome.com/f3288d0e27.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.js"></script>
+
 
 
 </head>
 
 <body>
-
-    <div id="background">
-
-        <div id="user">
-            <i class="fab fa-twitter-square"></i>
-            <div id="user-info">
+    <div class="profile">
+        <div class="profile-images">
             <?php
-                $imageData = base64_encode(file_get_contents($result -> profile_banner_url));
-                echo '<img src="data:image/jpeg;base64,'.$imageData.'" style="width:500px;height:200px;>';
-                $imageData = base64_encode(file_get_contents($result -> profile_image_url));
-                echo '<img src="data:image/jpeg;base64,'.$imageData.'" style="width:30px;height:30px;>';
-
+            $imageData = base64_encode(file_get_contents($result->profile_banner_url));
+            echo '<img src="data:image/jpeg;base64,' . $imageData . '" class = "background_profile">';
+            $imageData = base64_encode(file_get_contents($result->profile_image_url_https));
+            echo '<img src="data:image/jpeg;base64,' . $imageData . '" class = "photo_profile">';
             ?>
-                <p><b>{{$result -> username}}'s statistics / ID: {{$result -> id}}<b></p>
-                <p><b>Followers: {{$result -> followers}} Friends: {{$result -> friends}}</b></p>
+        </div>
+        <div class="profile-info">
+            <p class="username"> &#64;{{$result -> screen_name}}</p>
+            <p><b>Followings:</b>
+                @if($result -> friends>1000 && $result -> friends<1000000) <?php echo bcdiv($result->friends, '1000', 2); ?>K @elseif ($result -> friends>1000000)
+                    <?php echo bcdiv($result->friends, '1000000', 2); ?>M
+                    @else
+                    {{$result -> friends}}
+                    @endif
+
+                    <b>Followers:</b>
+                    @if($result -> followers>1000 && $result -> followers<1000000) <?php echo bcdiv($result->followers, '1000', 2); ?>K @elseif ($result -> followers>1000000)
+                        <?php echo bcdiv($result->followers, '1000000', 2); ?>M
+                        @else
+                        {{$result -> followers}}
+                        @endif
+            </p>
+        </div>
+
+        <div class="profile-info1">
+
+            <div class="profile-info2">
+                <p><b>Screen name: </b>{{$result -> screen_name}}</p>
+                <p></p><b>Display name: </b>{{$result -> name}}</p>
+                <p><b>Verified:</b>
+                    @if ($result -> verified)
+                    <i class="fas fa-certificate">Verified</i>
+                    @else
+                    Not verified
+                    @endif
+                </p>
+                <p><b>Protected:</b>
+                    @if ($result -> protected)
+                    <i class="fas fa-user-lock">Private</i>
+                    @else
+                    Public <i class="fas fa-lock-open"></i>
+                </p> @endif
+
+                <p><b>Description: </b>{{$result -> description}}</p>
             </div>
+
+            <div class="profile-info2">
+                <p><b>Location: </b>{{$result -> location}}</p>
+                <p><b>Url: </b>{{$result -> url}} </p>
+                <p><b>Date joined: </b>{{$result -> created_at}}</p>
+                <p><b>Twitter user ID: </b>{{$result -> id}}</p>
+                <p><b>Tweet languague: </b> @if ($result -> lang == NULL) undefined @else {{$result -> lang}} @endif </p>
+            </div>
+
+
         </div>
-        <div id = "profile">
-                <p><b>
-                    @if ($result -> description)
-                        Description: <br>  &nbsp;{{$result -> description}}.
-                    @else
-                        No description available.
-                    @endif
-                </br></p>
-                <p><b>
-                    @if ($result -> url)
-                        Url: <br> &nbsp;{{$result -> url}}.
-                    @else
-                        No url available.
-                    @endif
-                </b></p>
-                <p><b>Created at: <br> &nbsp;{{$result -> created_at}}</br></p>
+        <h1 style="color:white;">Statistics</h1>
+
+        <div class="basic-statistics">
+            <p><b>Tweets (including Retweets):</b> {{$result -> statuses_count}}</p>
+            <p><b>Likes: </b>{{$result -> favourites_count}}</p>
+            <p><b>Lists: </b>{{$result -> listed_count}}</p>
+            <p><b>Retweets: </b></p>
+            <p><b>Most recent post: </b>{{$result -> most_recent_post}}</p>
+            <p><b>Recent tweeks per day: </b>{{$result -> average_tweets_per_day}} </p>
+            <p><b>Retweet ratio: </b></p>
+            <p><b>Followers ratio: </b>{{$result -> followers_ratio}}</p>
         </div>
-        <div id="statistics">
-            <div id="botscore">
-                <div class="row d-flex justify-content-center flex-wrap" id="temps_div"></div>
+
+        <div class="botscore">
+
+            <div class="row d-flex justify-content-center flex-wrap" id="temps_div">
                 @gaugechart('Chart', 'temps_div')
             </div>
-            <div id="average">
-                <i class="far fa-comment-alt"></i>
-                <div id="average-tweets-per-day">
-                    <p><b>Average tweets per day</b></p>
-                    <h1><span class="blue">{{$result -> average_tweets_per_day}}</span></h1>
-                </div>
-            </div>
 
-            <div id="most_mentioned_Twitter_users">
+            
+            <table>
+                <tr>
+                    <th style="background-color:rgb(21,32,43); color:white;">English specific features</th>
+                </tr>
+                <tr>
+                    <td style=background-color:#ff5e00;><b>Content: </b>{{$result -> scores["display_scores"]["content"]}}</td>
+                </tr>
+                <tr>
+                    <td style=background-color:#00ff66;><b>Sentiment: </b>{{$result -> scores["display_scores"]["sentiment"]}}</td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                  
+                    <th style="background-color:rgb(21,32,43); color:white;">Language independent features</th>
+                    
+                </tr>
+                <tr>
+                    
+                    <td style=background-color:#eaff00;><b>Friend: </b>{{$result -> scores["display_scores"]["friend"]}}</td>
+                </tr>
+                <tr>
+                  
+                    <td style=background-color:#d968d3;><b>Network: </b>{{$result -> scores["display_scores"]["network"]}}</td>
+                </tr>
+                <tr>
+                    <td style=background-color:#e3e8a9;><b>Temporal: </b>{{$result -> scores["display_scores"]["temporal"]}}</td>
+                </tr>
+                <tr>
+                    <td style=background-color:#00ddff;><b>User: </b>{{$result -> scores["display_scores"]["user"]}}</td>
+                </tr>
+            </table>
+            <table>
+                <tr>
+                    <th style="background-color:rgb(21,32,43); color:white;">Bot score based on</th>
+                </tr>
+                <tr>
+                   
+                    <td style=background-color:#00ddff;><b>All features: </b>{{$result -> scores["display_scores"]["english"]}}</td>
+                </tr>
+                <tr>
+                    
+                    <td style=background-color:#b8ffe6;><b>Language-independent: </b>{{$result -> scores["display_scores"]["universal"]}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="barchart">
+            <div class="most_mentioned_Twitter_users">
                 @if (count($result-> most_mentioned_Twitter_users)>0)
 
-                    <p><b>Top 10 mentioned Twitter users</b></p>
-                    <table align="center">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($result-> most_mentioned_Twitter_users as $user)
-                            <tr>
-                                <td> &#64;{{$user[0]}} </td>
-                                <td> {{$user[1]}} </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+
+                <div id="poll_div2"></div>
+                @barchart('Most mentioned Twitter users', 'poll_div2')
+
+
                 @else
-                    <p><b>Not mentioned Twitter users found.</b></p>
+                <p><b>Not mentioned Twitter users found.</b></p>
 
                 @endif
 
             </div>
-            <div id="most_used_hashtags">
+            <div class="most_used_hashtags">
+
                 @if (count($result-> most_used_hashtags)>0)
-                    <p><b>Top 10 used hashtags</b></p>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Hashtag</th>
-                                <th>Count</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($result-> most_used_hashtags as $hashtag)
-                            <tr>
-                                <td> &#35;{{$hashtag[0]}} </td>
-                                <td> {{$hashtag[1]}} </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+
+                <div id="poll_div"></div>
+                @barchart('Hashtags', 'poll_div')
+
                 @else
-                    <p><b>Not hashtags found.</b></p>
+                <p><b>Not hashtags found.</b></p>
                 @endif
 
             </div>
-            
-            <div id="chart">
-                
+
+        </div>
+        <div class="chart">
+
+            <div class="friendships_analyzed">
                 @if (count($result ->followers_bots_analyzed) == 0 && count($result ->friends_bots_analyzed) == 0)
-                    <p><b>This user don't have any possible bot's friends/followers.</b></p>
-                    <i class="fas fa-robot"></i>
-                @else
-                    {!! $chart->render() !!}
+                <p style="text-align: center;"><b>This user don't have any possible bot's friends/followers.</b><br><i class="fas fa-robot"></i></p>
 
+                @else
+                {!! $chart->render() !!}
                 @endif
             </div>
+            <div class="average_of_tweets_by_day_of_week">
+                {!! $average_of_tweets_by_day_of_week_chart->render() !!}
+            </div>
         </div>
-        <div id="location">
-            @if ($result -> most_common_user_location != "")
-                <p><b>Most common user location</b></p>
-                <p <i class="fas fa-location-arrow"></i><b>{{$result -> most_common_user_location}}</b></p>
-            @else
-                <p><b>Not most common user location found.</b></p>  
-            @endif
-        </div>
-        <script src="{{ asset('js/app.js') }}"></script>
+
+        <footer>
+            <i class="far fa-copyright"> 2020 All Rights Reserved. Author: Iván Ayala Martínez (<a href="mailto:informaticacrtt@gmail.com">informaticacrtt@gmail.com)</a></i>
+        </footer>
+
+
     </div>
-
-
 </body>
 
-<footer id = "footer">
-    <i class="far fa-copyright"> 2020 All Rights Reserved. Author: Iván Ayala Martínez (<a href="mailto:informaticacrtt@gmail.com">informaticacrtt@gmail.com)</a></i>
-</footer>
+
 
 </html>

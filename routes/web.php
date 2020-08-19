@@ -11,12 +11,13 @@
 |
 */
 
+use Illuminate\Http\Request;
+
 Route::get('/', function () {
     return view('welcome');
 });
 Route::view('/search', 'search')->name('search');
 Route::post('/search', 'SearchController@show');
 Route::get('user/', 'UserController@show');
-
 
 

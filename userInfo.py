@@ -212,7 +212,8 @@ def profile_info_to_mongodb(user, user_collection):
                 'followers_ratio': round((float(user.followers_count)/float(user.friends_count)), 2),
                 'average_tweets_per_day': get_average_tweets_per_day(user),
                 'most_common_user_location': get_most_common_user_location(api, user),
-                'statuses_count': user.statuses_count
+                'statuses_count': user.statuses_count,
+                'lang': user.lang
                 # 'retweet_count': tweets[3], #fix
                 # 'retweets_of_me' : len(tweets[4]) #fix
             }
@@ -493,7 +494,6 @@ def friendships_by_userid_to_mongodb(user_id, user_collection):
 
 
 
-
 def main():
 
     # We try to get user
@@ -511,7 +511,6 @@ def main():
             most_used_hashtags_and_mentioned_Twitter_users_to_mongodb(
                 result[1], user_collection)
             average_of_tweets_by_day_of_week_to_mongodb(result[1].id,user_collection)
-            print ("Analizaremos sus amigos")
             friendships_by_userid_to_mongodb(result[1].id, user_collection)
             # update the database with friendships
             # get_friendships_by_userid(user.id, total_users, db.users)

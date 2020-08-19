@@ -11,21 +11,35 @@
 </head>
 
 <body>
-    <div id="botChecker">
-        <i class="fab fa-twitter-square"></i>
-        <h1>Bot Checker for Twitter</h1>
-        <form method="post" action="{{ route ('search') }}">
-            @csrf
-            <input name="username" placeholder="Username... "><br><br>
-            <p>or</p>
-            <input name="id" placeholder="Identifier... "><br><br>
-            <button>Search</button>
-        </form>
+    <div class="botChecker">
+
+        <div class="box">
+            <i class="fab fa-twitter-square"></i>
+            <h1 style="font-family: helvética;text-align: center; color:white;">Bot Checker for Twitter</h1>
+            <form method="post" action="{{ route ('search') }}">
+                @csrf
+                <input name="username" placeholder="Username... " style="font-family: helvética;"><br><br>
+                <p style="font-family: helvética;text-align: center; color:white;">or</p>
+                <input name="identifier" placeholder="Identifier... " style="font-family: helvética;"><br><br>
+                <button style="font-family: helvética;">Search</button>
+            </form>
+            @if(count($errors) > 0)
+            <ul class="alert alert-danger">
+                @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            @endif
+        </div>
+
+        <footer>
+            <i class="far fa-copyright"> 2020 All Rights Reserved. Author: Iván Ayala Martínez (<a href="mailto:informaticacrtt@gmail.com">informaticacrtt@gmail.com)</a></i>
+        </footer>
+
     </div>
+
 </body>
 
-<footer id = "footer">
-    <i class="far fa-copyright"> 2020 All Rights Reserved. Author: Iván Ayala Martínez (<a href="mailto:informaticacrtt@gmail.com">informaticacrtt@gmail.com)</a></i>
-</footer>
+
 
 </html>

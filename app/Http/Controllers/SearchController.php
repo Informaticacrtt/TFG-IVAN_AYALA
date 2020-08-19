@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FormValidateRequest;
 use App\User;
 use Khill\Lavacharts\Lavacharts;
-
+use Illuminate\Http\Request;
 
 require '../vendor/autoload.php';
 
@@ -14,14 +14,16 @@ use Lava;
 class SearchController extends Controller
 {
 
-    public function show(FormValidateRequest $request)
+    public function show(Request $request)
     {
-
-        if (!$request->has('username') && !$request->has('userID')) {
-            return back()->withInput();
+        $request->validate([
+            'username' => 'required_without:identifier',
+            'identifier' => 'required_without:username',
+        ]);
+        if(($request->has('username') && !empty($request->input('username'))) && ($request->has('identifier') && !empty($request->input('identifier')))){
+            return redirect()->back()->withErrors(['ERROR', 'Search by username or identifier, not both.']);;
         } else {
 
-          
             # We obtain user's information from our db.
             $result = User::getInfo($request);
 
@@ -30,11 +32,7 @@ class SearchController extends Controller
                 return view('error', compact('result'));
             } else {
 
-                
-
                 # In order to show Bot's core
-
-
                 $temps = Lava::DataTable();
 
                 $temps->addStringColumn('Type')
@@ -45,7 +43,7 @@ class SearchController extends Controller
                     'Chart',
                     $temps,
                     [
-                        'width' => 400,
+                        'width' => 600,
                         'greenFrom' => 0,
                         'greenTo' => 43,
                         'yellowFrom' => 43,
@@ -179,9 +177,10 @@ class SearchController extends Controller
                     ])
                     ->options([]);
 
+                return view('search', compact('result','chart','average_of_tweets_by_day_of_week_chart'));
 
 
-                return view('search2', compact('result', 'chart', 'temps', 'hashtags', 'most_mentioned_Twitter_users', 'average_of_tweets_by_day_of_week_chart'));
+                
             }
         }
     }

@@ -54,7 +54,7 @@ class User extends Eloquent implements Authenticatable
         $route = base_path().'/userInfo.py';
 
         // Depend on the input, the search is different.
-        if ($request-> has('username')){
+        if($request->has('username') && !empty($request->input('username'))){
             // Search by username
             foreach ($users as $user) {
                 if (strtoupper($user->screen_name) == strtoupper($request->username))
@@ -86,16 +86,16 @@ class User extends Eloquent implements Authenticatable
 
                 
         }
-        else if ($request-> has('userID')){
+        else {
             // Search by id
             foreach ($users as $user) {
-                if ($user-> id  == $request->userID)
+                if ($user-> id  == $request->identifier)
                     return $user;
             }
             // In this case, the user doesn't appear at database.
             // So, we've to use our own script in order to get all 
             // information about the requested user.   
-            $process = new Process("python3 $route {$request->userID} " );
+            $process = new Process("python3 $route {$request->identifier} " );
 
             try {
                 $process->mustRun();
@@ -110,7 +110,7 @@ class User extends Eloquent implements Authenticatable
 
             // Search by id
             foreach ($users as $user) {
-                if ($user-> id  == $request-> userID)
+                if ($user-> id  == $request-> identifier)
                     return $user;
             }
 
