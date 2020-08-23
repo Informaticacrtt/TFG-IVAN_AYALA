@@ -66,7 +66,7 @@
 
             <div class="profile-info2">
                 <p><b>Location: </b>{{$result -> location}}</p>
-                <p><b>Url: </b>{{$result -> url}} </p>
+                <p><b>URL: </b>{{$result -> url}} </p>
                 <p><b>Date joined: </b>{{$result -> created_at}}</p>
                 <p><b>Twitter user ID: </b>{{$result -> id}}</p>
                 <p><b>Tweet languague: </b> @if ($result -> lang == NULL) undefined @else {{$result -> lang}} @endif </p>
@@ -82,7 +82,7 @@
             <p><b>Lists: </b>{{$result -> listed_count}}</p>
             <p><b>Retweets: </b></p>
             <p><b>Most recent post: </b>{{$result -> most_recent_post}}</p>
-            <p><b>Recent tweeks per day: </b>{{$result -> average_tweets_per_day}} </p>
+            <p><b>Recent Tweets per day: </b>{{$result -> average_tweets_per_day}} </p>
             <p><b>Retweet ratio: </b></p>
             <p><b>Followers ratio: </b>{{$result -> followers_ratio}}</p>
         </div>
@@ -93,7 +93,7 @@
                 @gaugechart('Chart', 'temps_div')
             </div>
 
-            
+
             <table>
                 <tr>
                     <th style="background-color:rgb(21,32,43); color:white;">English specific features</th>
@@ -107,16 +107,16 @@
             </table>
             <table>
                 <tr>
-                  
+
                     <th style="background-color:rgb(21,32,43); color:white;">Language independent features</th>
-                    
+
                 </tr>
                 <tr>
-                    
+
                     <td style=background-color:#eaff00;><b>Friend: </b>{{$result -> scores["display_scores"]["friend"]}}</td>
                 </tr>
                 <tr>
-                  
+
                     <td style=background-color:#d968d3;><b>Network: </b>{{$result -> scores["display_scores"]["network"]}}</td>
                 </tr>
                 <tr>
@@ -131,11 +131,11 @@
                     <th style="background-color:rgb(21,32,43); color:white;">Bot score based on</th>
                 </tr>
                 <tr>
-                   
+
                     <td style=background-color:#00ddff;><b>All features: </b>{{$result -> scores["display_scores"]["english"]}}</td>
                 </tr>
                 <tr>
-                    
+
                     <td style=background-color:#b8ffe6;><b>Language-independent: </b>{{$result -> scores["display_scores"]["universal"]}}</td>
                 </tr>
             </table>
@@ -181,7 +181,7 @@
                 @endif
             </div>
             <div class="average_of_tweets_by_day_of_week">
-                {!! $average_of_tweets_by_day_of_week_chart->render() !!}
+                {!! $average->render() !!}
             </div>
         </div>
 
