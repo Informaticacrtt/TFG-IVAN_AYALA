@@ -104,7 +104,8 @@ def get_botscore_by_userid(user):
                              'scores': result,
                              'screen_name': user.screen_name,
                              'id': user.id,
-                             'error': 'None'
+                             'error': 'None',
+                             'checked': datetime.now().strftime("%d/%m/%Y")
                          }},
                          upsert=True
                          )
@@ -120,7 +121,8 @@ def get_botscore_by_userid(user):
                              {'$unset': {'scores': ""},
                               '$set': {'screen_name': user.screen_name,
                                        'id': user.id,
-                                       'error': 'not authorized'},
+                                       'error': 'not authorized',
+                                       'checked': datetime.now().strftime("%d/%m/%Y")},
                               '$push': {'error_key_used': consumer_key}},
                              upsert=True
                              )
@@ -129,7 +131,8 @@ def get_botscore_by_userid(user):
                              {'$unset': {'scores': ""},
                               '$set': {'screen_name': user.screen_name,
                                        'id': user.id,
-                                       'error': 'over capacity'},
+                                       'error': 'over capacity',
+                                       'checked': datetime.now().strftime("%d/%m/%Y")},
                               '$push': {'error_key_used': consumer_key}},
                              upsert=True
                              )
@@ -139,14 +142,16 @@ def get_botscore_by_userid(user):
                              {'$unset': {'scores': ""},
                               '$set': {'screen_name': user.screen_name,
                                        'id': user.id,
-                                       'error': 'has no tweets in timeline'}},
+                                       'error': 'has no tweets in timeline',
+                                       'checked': datetime.now().strftime("%d/%m/%Y")}},
                              upsert=True
                              )
         elif notExist_match:
             # print("User", user_id, " does not exists anymore")
             return UpdateOne({'_id': make_objid(user_id)},
                              {'$unset': {'scores': ""},
-                              '$set': {'error': 'does not exists anymore'}},
+                              '$set': {'error': 'does not exists anymore',
+                              'checked': datetime.now().strftime("%d/%m/%Y")}},
                              upsert=True
                              )
         else:
@@ -158,7 +163,8 @@ def get_botscore_by_userid(user):
                               '$set': {
                                  'screen_name': user.screen_name,
                                  'id': user.id,
-                                 'error': str(e)}
+                                 'error': str(e),
+                                 'checked': datetime.now().strftime("%d/%m/%Y")}
                               },
                              upsert=True
                              )
@@ -392,8 +398,6 @@ def friendships_by_userid_to_mongodb(user_id, user_collection):
         protected_user = user.protected
 
         if not protected_user == True:
-
-            print("not protected")
 
             political_friendship_ids = {
                 'friends': [],

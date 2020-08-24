@@ -59,7 +59,8 @@
                     <i class="fas fa-user-lock">Private</i>
                     @else
                     Public <i class="fas fa-lock-open"></i>
-                </p> @endif
+                    @endif
+                </p> 
 
                 <p><b>Description: </b>{{$result -> description}}</p>
             </div>

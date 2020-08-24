@@ -8,6 +8,7 @@ use Illuminate\Auth\Authenticatable as AuthenticableTrait;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
+use DateTime;
 
 class User extends Eloquent implements Authenticatable
 {
@@ -39,8 +40,12 @@ class User extends Eloquent implements Authenticatable
 
         // Search by input
         foreach ($users as $user) {
-            if (strtoupper($user->$query) == strtoupper($input))
-                return $user;
+            if (strtoupper($user->$query) == strtoupper($input)){
+                $diff = abs(strtotime($user->checked) - strtotime(date('d-m-Y-')));
+                if ($diff==0)
+                    return $user;
+            }
+                
         }
 
         // In this case, the user doesn't appear at database.
