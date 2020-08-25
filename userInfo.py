@@ -49,6 +49,11 @@ MINIMUM_BOTSCORE = 0.43
 
 
 def get_user(user):
+    """Get user object
+
+    Keyword arguments:
+    user -- string to be search
+    """
 
     message = "Checking:" + str(user) + " "
 
@@ -91,7 +96,7 @@ def get_botscore_by_userid(user):
     Collects the botscore from Botometer
 
     Keyword arguments:
-    user_id -- Twitter users' identificator
+    user -- Twitter users' identificator
     """
 
     user_id = user.id
@@ -184,6 +189,13 @@ def botscore_to_mongodb(user, user_collection):
     user_collection.bulk_write([botscore])
 
 def profile_info_to_mongodb(user, user_collection):
+    """
+    Save user' profile in MongoDB.
+
+    Keyword arguments:
+    user -- Twitter user's identificator
+    user_collection -- MongoDB Users' Collection
+    """
 
     filter_uid = {'_id': make_objid(user.id)}
     botometer_instance = random.choice(keys)
@@ -230,6 +242,12 @@ def profile_info_to_mongodb(user, user_collection):
         print("Error profile_info_to_mongodb")
 
 def get_average_tweets_per_day(user):
+    """
+    Get average tweets per day.
+
+    Keyword arguments:
+    user -- User object
+    """
 
     tweets = user.statuses_count
     account_created_date = user.created_at
@@ -241,8 +259,16 @@ def get_average_tweets_per_day(user):
         average_tweets = round((float(tweets)/float(account_age_days)), 2)
 
     return average_tweets
-# Falta tratar errores
+
 def get_most_common_user_location(api, user):
+    """
+    Get most common user location.
+
+    Keyword arguments:
+    api -- Tweepy api
+    user -- User object
+    
+    """
 
     try:
         message = "Checking:" + str(user.id) + " "
@@ -267,8 +293,15 @@ def get_most_common_user_location(api, user):
     except Exception as e:
         print(message+" get_most_common_user_location - Exception. User:", user.id, "API:",
               TWITTER_DEV_CONSUMER_KEY, "Message:", e)
-# Falta tratar errores
+
 def most_used_hashtags_and_mentioned_Twitter_users_to_mongodb(user, user_collection):
+    """
+    Save most used hashtags and mentioned Twitter users in MongoDB.
+
+    Keyword arguments:
+    user -- User object
+    user_collection -- MongoDB Users' Collection
+    """
     filter_uid = {'_id': make_objid(user.id)}
     botometer_instance = random.choice(keys)
     consumer_key = botometer_instance.consumer_key
@@ -328,9 +361,15 @@ def most_used_hashtags_and_mentioned_Twitter_users_to_mongodb(user, user_collect
     except Exception as e:
         print(message+"Exception. User:", user.id, "API:",
               TWITTER_DEV_CONSUMER_KEY, "Message:", e)
-# Falta tratar errores
-def average_of_tweets_by_day_of_week_to_mongodb(user_id, user_collection):
 
+def average_of_tweets_by_day_of_week_to_mongodb(user_id, user_collection):
+    """
+    Save average of tweets by day of week of user in MongoDB.
+
+    Keyword arguments:
+    user_id -- Twitter user's identificator
+    user_collection -- MongoDB Users' Collection
+    """
     filter_uid = {'_id': make_objid(user_id)}
     botometer_instance = random.choice(keys)
     consumer_key = botometer_instance.consumer_key
@@ -372,8 +411,7 @@ def average_of_tweets_by_day_of_week_to_mongodb(user_id, user_collection):
 
 def friendships_by_userid_to_mongodb(user_id, user_collection):
     """
-    Consults followers and followings of a user and save in MongoDB
-    those who are within the total recollected sample of users.
+    Get information about followers and followings of a user and save in MongoDB.
 
     Keyword arguments:
     user_id -- Twitter user's identificator
@@ -515,13 +553,12 @@ def main():
             most_used_hashtags_and_mentioned_Twitter_users_to_mongodb(
                 result[1], user_collection)
             average_of_tweets_by_day_of_week_to_mongodb(result[1].id,user_collection)
-            friendships_by_userid_to_mongodb(result[1].id, user_collection)
             # update the database with friendships
-            # get_friendships_by_userid(user.id, total_users, db.users)
-
+            friendships_by_userid_to_mongodb(result[1].id, user_collection)
     else:
         print("get_user fail")
         return result[1]
 
 
+# Run the script
 main()
