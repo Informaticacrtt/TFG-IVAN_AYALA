@@ -81,10 +81,8 @@
             <p><b>Tweets (including Retweets):</b> {{$result -> statuses_count}}</p>
             <p><b>Likes: </b>{{$result -> favourites_count}}</p>
             <p><b>Lists: </b>{{$result -> listed_count}}</p>
-            <p><b>Retweets: </b></p>
             <p><b>Most recent post: </b>{{$result -> most_recent_post}}</p>
             <p><b>Recent Tweets per day: </b>{{$result -> average_tweets_per_day}} </p>
-            <p><b>Retweet ratio: </b></p>
             <p><b>Followers ratio: </b>{{$result -> followers_ratio}}</p>
         </div>
 

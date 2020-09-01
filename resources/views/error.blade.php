@@ -13,19 +13,22 @@
 </head>
 
 <body>
-    <div id="botChecker">
-        
-        <i class="fas fa-exclamation-triangle"></i>
-        <h1> Error : {{$result -> Error}}</h1>
-        @if ($result -> protected)
-            <i class="fas fa-lock"> Account is protected</i>
-        @endif
-        
-    </div>
-</body>
+    <div class="profile">
 
-<footer id = "footer">
-    <i class="far fa-copyright"> 2020 All Rights Reserved. Author: Iván Ayala Martínez (<a href="mailto:informaticacrtt@gmail.com">informaticacrtt@gmail.com)</a></i>
-</footer>
+        <div class="botChecker">
+
+            <i class="fas fa-exclamation-triangle"></i>
+            <h1 style="color:white;"> Error : {{$result -> error}}</h1>
+            @if ($result -> protected)
+            <i class="fas fa-lock">Account is protected</i> 
+            @endif
+
+        </div>
+        <footer id="footer">
+            <i class="far fa-copyright"> 2020 All Rights Reserved. Author: Iván Ayala Martínez (<a href="mailto:informaticacrtt@gmail.com">informaticacrtt@gmail.com)</a></i>
+        </footer>
+    </div>
+
+</body>
 
 </html>

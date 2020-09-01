@@ -41,8 +41,11 @@ class User extends Eloquent implements Authenticatable
         // Search by input
         foreach ($users as $user) {
             if (strtoupper($user->$query) == strtoupper($input)){
-                $diff = abs(strtotime($user->checked) - strtotime(date('d-m-Y-')));
-                if ($diff==0)
+                $today =  DateTime::createFromFormat('d/m/Y', date('d/m/Y'));
+                $checked =  DateTime::createFromFormat('d/m/Y',$user->checked);
+                $diff = $checked->diff($today);
+                
+                if ($diff->format('%d')==0)
                     return $user;
             }
                 

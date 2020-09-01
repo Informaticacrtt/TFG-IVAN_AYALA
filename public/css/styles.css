@@ -365,6 +365,7 @@ Content
         background-color: rgb(21, 32, 43);
         height: 100%;
         justify-content: space-evenly;
+        color: white;
     }
     
     .fa-twitter-square {
@@ -382,4 +383,14 @@ Content
         width: 100%;
         text-align: center;
         align-items: center;
+    }
+    
+    .fa-lock {
+        color: white;
+    }
+    
+    .fa-exclamation-triangle {
+        color: white;
+        font-size: 150px;
+        text-align: center;
     }
