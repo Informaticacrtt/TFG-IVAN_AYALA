@@ -70,7 +70,7 @@
                 <p><b>URL: </b>{{$result -> url}} </p>
                 <p><b>Date joined: </b>{{$result -> created_at}}</p>
                 <p><b>Twitter user ID: </b>{{$result -> id}}</p>
-                <p><b>Tweet languague: </b> @if ($result -> lang == NULL) undefined @else {{$result -> lang}} @endif </p>
+                <p><b>Tweet languague: </b> {{$result -> scores["user"]["majority_lang"]}}</p>
             </div>
 
 
@@ -95,49 +95,33 @@
 
             <table>
                 <tr>
-                    <th style="background-color:rgb(21,32,43); color:white;">English specific features</th>
+                    <th style="background-color:rgb(21,32,43); color:white;">Bot type scores</th>
                 </tr>
                 <tr>
-                    <td style=background-color:#ff5e00;><b>Content: </b>{{$result -> scores["display_scores"]["content"]}}</td>
+                    <td style=background-color:#ff5e00;><b>Astroturf: </b> {{$result -> scores['display_scores']['universal']['astroturf']}}</td>
                 </tr>
                 <tr>
-                    <td style=background-color:#00ff66;><b>Sentiment: </b>{{$result -> scores["display_scores"]["sentiment"]}}</td>
+                    <td style=background-color:#00ff66;><b>Fake follower: </b>{{$result -> scores['display_scores']['universal']['fake_follower']}}</td>
+                </tr>
+                <tr>
+
+                    <td style=background-color:#eaff00;><b>Financial: </b>{{$result -> scores['display_scores']['universal']['financial']}}</td>
+                </tr>
+                <tr>
+
+                <td style=background-color:#d968d3;><b>Self declared: </b>{{$result -> scores['display_scores']['universal']['self_declared']}}</td>
+                </tr>
+                <tr>
+                <td style=background-color:#e3e8a9;><b>Spammer: </b>{{$result -> scores['display_scores']['universal']['spammer']}}</td>
+                </tr>
+                <tr>
+                <td style=background-color:#00ddff;><b>Other: </b>{{$result -> scores['display_scores']['universal']['other']}}</td>
                 </tr>
             </table>
-            <table>
-                <tr>
 
-                    <th style="background-color:rgb(21,32,43); color:white;">Language independent features</th>
-
-                </tr>
-                <tr>
-
-                    <td style=background-color:#eaff00;><b>Friend: </b>{{$result -> scores["display_scores"]["friend"]}}</td>
-                </tr>
-                <tr>
-
-                    <td style=background-color:#d968d3;><b>Network: </b>{{$result -> scores["display_scores"]["network"]}}</td>
-                </tr>
-                <tr>
-                    <td style=background-color:#e3e8a9;><b>Temporal: </b>{{$result -> scores["display_scores"]["temporal"]}}</td>
-                </tr>
-                <tr>
-                    <td style=background-color:#00ddff;><b>User: </b>{{$result -> scores["display_scores"]["user"]}}</td>
-                </tr>
-            </table>
-            <table>
-                <tr>
-                    <th style="background-color:rgb(21,32,43); color:white;">Bot score based on</th>
-                </tr>
-                <tr>
-
-                    <td style=background-color:#00ddff;><b>All features: </b>{{$result -> scores["display_scores"]["english"]}}</td>
-                </tr>
-                <tr>
-
-                    <td style=background-color:#b8ffe6;><b>Language-independent: </b>{{$result -> scores["display_scores"]["universal"]}}</td>
-                </tr>
-            </table>
+        
+            
+  
         </div>
 
         <div class="barchart">
